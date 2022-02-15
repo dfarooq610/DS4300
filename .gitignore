@@ -1,2 +1,6 @@
 .DS_Store
 HW1/data/sample
+*.iml
+HW1/.idea
+HW1/lib
+Hw1/out
