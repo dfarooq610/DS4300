@@ -3,7 +3,6 @@ CREATE DATABASE twitter;
 
 DROP TABLE IF EXISTS tweet;
 
--- A table representing all tweets. The user “user_id” tweets the tweet.
 CREATE TABLE tweet
 (
     tweet_id serial PRIMARY KEY,

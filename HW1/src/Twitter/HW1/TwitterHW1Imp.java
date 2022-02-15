@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Implements the TwitterHW1 Interface using a connection to a Relational Database (Specifically in the semantics of
+ * Implements the TwitterAPI Interface using a connection to a Relational Database (Specifically in the semantics of
  * PostgreSQL).
  */
 public class TwitterHW1Imp implements TwitterAPI {
