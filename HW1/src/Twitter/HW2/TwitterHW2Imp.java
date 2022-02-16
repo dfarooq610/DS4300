@@ -36,25 +36,15 @@ public class TwitterHW2Imp implements TwitterAPI {
         
         // for each follower, add tweet id to their timeline
         for (Integer follower : followers) {
-            this.jedis.lpush("timelineTweetIds:" + follower, latestTweetID);
+            this.jedis.lpush("timeline:" + follower, latestTweetID);
         }
 
         latestTweetID++; // increment latest tweet id
     }
 
     @Override
-    public List<Tweet> getTimeline(int userId) {
-        List<String> tweetIds = this.getTimelineIds(int userId); // get the user's timeline of tweet ids
-        List<Tweet> timeline = new ArrayList<Tweet>(); // create a list of tweets to return
-        for (tweetid : tweetIds) {
-            timeline.add(this.jedis.hgetAll("tweet:" + tweetId)); // add each tweet to the list // IS THIS A THING???
-        }
-        return timeline;
-    }
-
-    // gets the timeline of this user, with each tweet represented by its tweet_id
-    private List<Integer> getTimelineIds(int userId) {
-        return this.jedis.lrange("timelineTweetIds:" + userId, -10, 1);
+    private List<Integer> getTimeline(int userId) {
+        return this.jedis.lrange("timeline:" + userId, -10, 1);
     }
 
     @Override
@@ -87,14 +77,12 @@ public class TwitterHW2Imp implements TwitterAPI {
         if (!this.jedis.exists("user:" + userId)) {
             this.jedis.hset("user:" + userId, "followers", "followers:" + userId);
             this.jedis.hset("user:" + userId, "follows", "follows:" + userId);
-            this.jedis.hset("user:" + userId, "timelineTweetIds", "timelineTweetIds:" + userId);
             this.jedis.hset("user:" + userId, "timeline", "timeline:" + userId);
             this.jedis.lpush("users", userId);
         }
         if (!this.jedis.exists("user:" + followId)) {
             this.jedis.hset("user:" + followId, "follows", "follows:" + followId);
             this.jedis.hset("user:" + followId, "followers", "followers:" + followId);
-            this.jedis.hset("user:" + followId, "timelineTweetIds", "timelineTweetIds:" + followId);
             this.jedis.hset("user:" + followId, "timeline", "timeline:" + followId);
             this.jedis.lpush("users", followId);
         }
