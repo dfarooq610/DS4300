@@ -51,6 +51,11 @@ public interface TwitterAPI {
     List<Integer> getAllUsers();
 
     /**
+     * The given userId will follow the user with the followId.
+     */
+    void addFollow(int userId, int followId);
+
+    /**
      * Closes the connection to the database.
      */
     void closeConnection();

@@ -2,6 +2,7 @@ package Twitter.HW2;
 
 import Twitter.Tweet;
 import Twitter.TwitterAPI;
+import redis.clients.jedis.Jedis;
 
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,12 @@ import java.util.Set;
  * (TODO: elaborate more about schema)
  */
 public class TwitterHW2Imp implements TwitterAPI {
+    private Jedis jedis;
+
+    public TwitterHW2Imp() {
+        this.jedis = new Jedis();
+        jedis.flushAll();
+    }
 
     @Override
     public void postTweet(Tweet t) {
@@ -40,6 +47,14 @@ public class TwitterHW2Imp implements TwitterAPI {
     @Override
     public List<Integer> getAllUsers() {
         return null;
+    }
+
+    @Override
+    public void addFollow(int userId, int followId) {
+        // if the user does not already exist, create a followers and follows list for them.
+        // if the follow does not already exist, create a followers and follows list for them.
+        // add the userId to the followId's followers
+        // add the followID to the userId's follows (**NECESSARY FOR GET TIMELINE**)
     }
 
     @Override

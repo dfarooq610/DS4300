@@ -74,6 +74,11 @@ public class TwitterHW1Imp implements TwitterAPI {
     }
 
     @Override
+    public void addFollow(int userId, int followId) {
+        // manually import csv via PSQL
+    }
+
+    @Override
     public void closeConnection() {
         RDBUtils.closeConnection();
     }
