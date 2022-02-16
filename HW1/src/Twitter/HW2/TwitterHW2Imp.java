@@ -44,12 +44,12 @@ public class TwitterHW2Imp implements TwitterAPI {
 
     @Override
     private List<Integer> getTimeline(int userId) {
-        return this.jedis.lrange("timeline:" + userId, -10, 1);
+        return this.jedis.hget("user:" + userId, "timeline");
     }
 
     @Override
     public Set<Integer> getFollowers(int userId) {
-        return this.jedis.smembers("followers:" + t.getUserId());;
+        return this.jedis.hget("user:" + userId, "followers");
     }
 
     @Override
