@@ -81,6 +81,7 @@ public class TwitterHW2Imp implements TwitterAPI {
     public void addFollow(int userId, int followId) {
         // if the user does not already exist, create a followers, follows list, and timeline for them.
         // if the follow does not already exist, create a followers, follows list, and timeline for them.
+        // add the user to the list of users
         // add the userId to the followId's followers
         // add the followID to the userId's follows (**NECESSARY FOR GET TIMELINE**)
         if (!this.jedis.exists("user:" + userId)) {
