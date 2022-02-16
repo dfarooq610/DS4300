@@ -9,29 +9,57 @@ import java.util.Set;
 
 /**
  * Implements the TwitterAPI Interface using a connection to Redis, implementing Strategy 2 from the HW Doc
- * (TODO: elaborate more about schema)
+ *
+ * The Redis schema contains tweet objects represented as tweet:{tweed_Id} as well as a latestTweetID
+ * which is the id of the latest tweet in the system. It also contains a set of users in the system, including
+ * users who have tweeted and users who follow or are followed by users who have tweeted. We store a 
+ * latestUserID which is the id of the latest user in the system. Users are represented as user:{user_Id} with
+ * user_Id being the id of the user. Their followers are represented as followers:{user_Id} (a list of people
+ * who follow the user) and their timeline is represented as timeline:{user_Id} (a list of tweets posted by this
+ * user's follows).
  */
 public class TwitterHW2Imp implements TwitterAPI {
     private Jedis jedis;
+    private int latestTweetID;
 
     public TwitterHW2Imp() {
         this.jedis = new Jedis();
+        this.latestTweetID = 1;
         jedis.flushAll();
     }
 
     @Override
     public void postTweet(Tweet t) {
+        this.jedis.hset("tweet:" + (latestTweetID + 1), "user_id", t.getUserId()); // add tweet to database with the latest tweet id
 
+        Set<Integer> followers = this.getFollowers(t.getUserId()); // get followers of the user who posted this tweet
+        
+        // for each follower, add tweet id to their timeline
+        for (Integer follower : followers) {
+            this.jedis.lpush("timelineTweetIds:" + follower, latestTweetID);
+        }
+
+        latestTweetID++; // increment latest tweet id
     }
 
     @Override
     public List<Tweet> getTimeline(int userId) {
-        return null;
+        List<String> tweetIds = this.getTimelineIds(int userId); // get the user's timeline of tweet ids
+        List<Tweet> timeline = new ArrayList<Tweet>(); // create a list of tweets to return
+        for (tweetid : tweetIds) {
+            timeline.add(this.jedis.hgetAll("tweet:" + tweetId)); // add each tweet to the list // IS THIS A THING???
+        }
+        return timeline;
+    }
+
+    // gets the timeline of this user, with each tweet represented by its tweet_id
+    private List<Integer> getTimelineIds(int userId) {
+        return this.jedis.lrange("timelineTweetIds:" + userId, -10, 1);
     }
 
     @Override
     public Set<Integer> getFollowers(int userId) {
-        return null;
+        return this.jedis.smembers("followers:" + t.getUserId());;
     }
 
     @Override
@@ -46,19 +74,35 @@ public class TwitterHW2Imp implements TwitterAPI {
 
     @Override
     public List<Integer> getAllUsers() {
-        return null;
+        return this.jedis.lrange("users", 0, -1);
     }
 
     @Override
     public void addFollow(int userId, int followId) {
-        // if the user does not already exist, create a followers and follows list for them.
-        // if the follow does not already exist, create a followers and follows list for them.
+        // if the user does not already exist, create a followers, follows list, and timeline for them.
+        // if the follow does not already exist, create a followers, follows list, and timeline for them.
         // add the userId to the followId's followers
         // add the followID to the userId's follows (**NECESSARY FOR GET TIMELINE**)
+        if (!this.jedis.exists("user:" + userId)) {
+            this.jedis.hset("user:" + userId, "followers", "followers:" + userId);
+            this.jedis.hset("user:" + userId, "follows", "follows:" + userId);
+            this.jedis.hset("user:" + userId, "timelineTweetIds", "timelineTweetIds:" + userId);
+            this.jedis.hset("user:" + userId, "timeline", "timeline:" + userId);
+            this.jedis.lpush("users", userId);
+        }
+        if (!this.jedis.exists("user:" + followId)) {
+            this.jedis.hset("user:" + followId, "follows", "follows:" + followId);
+            this.jedis.hset("user:" + followId, "followers", "followers:" + followId);
+            this.jedis.hset("user:" + followId, "timelineTweetIds", "timelineTweetIds:" + followId);
+            this.jedis.hset("user:" + followId, "timeline", "timeline:" + followId);
+            this.jedis.lpush("users", followId);
+        }
+        this.jedis.sadd("followers:" + followId, userId);
+        this.jedis.sadd("follows:" + userId, followId);
     }
 
     @Override
     public void closeConnection() {
-
+        this.jedis.close();
     }
 }
