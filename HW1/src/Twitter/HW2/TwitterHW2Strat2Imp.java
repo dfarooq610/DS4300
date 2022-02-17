@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 /**
  * Implements the TwitterAPI Interface using a connection to Redis, implementing Strategy 2 from the HW Doc
- * <p>
+ * <p> {TODO: update schema comment + write report}
  * The Redis schema contains tweet objects represented as tweet:{tweed_Id} as well as a latestTweetID
  * which is the id of the latest tweet in the system. It also contains a set of users in the system, including
  * users who have tweeted and users who follow or are followed by users who have tweeted. We store a
@@ -20,18 +20,18 @@ import java.util.stream.Collectors;
  * who follow the user) and their timeline is represented as timeline:{user_Id} (a list of tweets posted by this
  * user's follows).
  */
-public class TwitterHW2Imp implements TwitterAPI {
+public class TwitterHW2Strat2Imp implements TwitterAPI {
     private final Jedis jedis;
 
     public static String LATEST_TWEET_ID_KEY = "latestTweetId";
     public static String FOLLOWERS_PREFIX = "followers:";
     public static String FOLLOWS_PREFIX = "follows:";
     public static String TIMELINE_PREFIX = "timeline:";
-    public static String TWEET_TXT_HASH_KEY = "tweetTxt:";
-    public static String TWEET_TS_HASH_KEY = "tweetTS:";
+    public static String TWEET_TXT_KEY = "tweetTxt:";
+    public static String TWEET_TS_KEY = "tweetTS:";
     public static String USERS_SET = "users";
 
-    public TwitterHW2Imp() {
+    public TwitterHW2Strat2Imp() {
         this.jedis = new Jedis();
         jedis.set("latestTweetId", "1");
     }
@@ -41,7 +41,7 @@ public class TwitterHW2Imp implements TwitterAPI {
      *
      * @param flush - a boolean representing if we should flush the db or not. Flush if true, else do nothing.
      */
-    public TwitterHW2Imp(boolean flush) {
+    public TwitterHW2Strat2Imp(boolean flush) {
         this();
         if (flush) {
             jedis.flushAll();
@@ -53,8 +53,8 @@ public class TwitterHW2Imp implements TwitterAPI {
     public void postTweet(Tweet t) {
         String latestTweetId = getLatestTweetId();
         // add tweet to database with the latest tweet id in the form userId tweetTxt tweetTS
-        this.jedis.hset(TWEET_TS_HASH_KEY, latestTweetId, t.getTweetTS().toString());
-        this.jedis.hset(TWEET_TXT_HASH_KEY, latestTweetId, t.getTweetTxt());
+        this.jedis.set(TWEET_TS_KEY + latestTweetId, t.getTweetTS().toString());
+        this.jedis.set(TWEET_TXT_KEY + latestTweetId, t.getTweetTxt());
         Set<Integer> followers = this.getFollowers(t.getUserId()); // get followers of the user who posted this tweet
         // for each follower, add tweet id to their timeline
         for (Integer follower : followers) {
@@ -71,8 +71,8 @@ public class TwitterHW2Imp implements TwitterAPI {
 
         // for each tweet, get the tweet hash info, parse it, and convert it to a Tweet object
         return tweetIds.stream().map(id -> {
-            String tweetTxt = jedis.hget(TWEET_TXT_HASH_KEY, Integer.toString(id));
-            Timestamp tweetTs = Timestamp.valueOf(jedis.hget(TWEET_TS_HASH_KEY, Integer.toString(id)));
+            String tweetTxt = jedis.get(TWEET_TXT_KEY + id);
+            Timestamp tweetTs = Timestamp.valueOf(jedis.get(TWEET_TS_KEY + id));
             return new Tweet(id, userId, tweetTxt, tweetTs);
         }).collect(Collectors.toList());
     }

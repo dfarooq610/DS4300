@@ -1,7 +1,5 @@
 package ClientPrograms;
 
-import Twitter.HW1.TwitterHW1Imp;
-import Twitter.HW2.TwitterHW2Imp;
 import Twitter.TwitterAPI;
 
 import java.util.List;
@@ -17,12 +15,13 @@ import java.util.Random;
  *
  * For a postgres db, you can do this by running
  * "psql -c "\copy  follows from  '<FULL_CSV_LOCATION>' DELIMITER ',' CSV HEADER" -U <TWITTER_USER> -d <DB_NAME>
+ *
+ * For Redis, run the InsertFollows Program.
  */
 public class GetTimelines {
 
     public static void main(String[] args) {
-//        TwitterAPI api = new TwitterHW1Imp(System.getenv("TWITTER_USER"), System.getenv("TWITTER_PASSWORD"), "jdbc:postgresql://localhost:5432/twitter");
-        TwitterAPI api = new TwitterHW2Imp();
+        TwitterAPI api = TwitterFactory.createTwitter(TwitterFactory.TwitterType.REDIS_STRAT2);
         List<Integer> userIds = api.getAllUsers();
         System.out.println("Choosing from " + userIds.size() + " users total");
 

@@ -1,7 +1,6 @@
 package ClientPrograms;
 
-import Twitter.HW1.TwitterHW1Imp;
-import Twitter.HW2.TwitterHW2Imp;
+import Twitter.HW2.TwitterHW2Strat2Imp;
 import Twitter.Tweet;
 import Twitter.TwitterAPI;
 
@@ -19,6 +18,10 @@ import java.util.Scanner;
  *
  * The way to reset the tweets DB in a relational db is to run: "DELETE FROM follows;" then
  * "ALTER SEQUENCE tweet_tweet_id_seq RESTART WITH 1;"
+ *
+ * To reset everything in a key-value store, you can run FLUSHALL.
+ *
+ * Either way, ensure that the follows table has been inserted prior to running.
  */
 public class PostTweets {
     private static final String COMMA_DELIMITER = ",";
@@ -44,9 +47,7 @@ public class PostTweets {
     }
 
     private static int postAllTweets() {
-//        TwitterAPI api = new TwitterHW1Imp(System.getenv("TWITTER_USER"), System.getenv("TWITTER_PASSWORD"), "jdbc:postgresql://localhost:5432/twitter");
-
-        TwitterAPI api = new TwitterHW2Imp();
+        TwitterAPI api = TwitterFactory.createTwitter(TwitterFactory.TwitterType.REDIS_STRAT2);
         int i = 0;
         try {
             String line;

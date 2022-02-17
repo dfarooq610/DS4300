@@ -1,6 +1,6 @@
 package ClientPrograms;
 
-import Twitter.HW2.TwitterHW2Imp;
+import Twitter.HW2.TwitterHW2Strat2Imp;
 import Twitter.TwitterAPI;
 
 import java.io.BufferedReader;
@@ -11,6 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Script to insert a CSV of follow information into the db using the API. This can be
+ * done via the command line for relational databases. Otherwise, this serves as a programmatic way to
+ * insert follows using the API.
+ */
 public class InsertFollows {
     private static final String COMMA_DELIMITER = ",";
     public static String FILENAME = "data/test/follows.csv";
@@ -20,23 +25,12 @@ public class InsertFollows {
         int i = addAllFollowers();
         long end = System.nanoTime();
         System.out.println("total follows: " + i);
-        System.out.println("time elapsed: " + intervalToSeconds(begin, end));
-        System.out.println("follows per sec: " + (i / intervalToSeconds(begin, end)));
-    }
-
-    /**
-     * Handy helper method that tells us the duration between the start and end in seconds
-     *
-     * @param start - the start time in nanoseconds
-     * @param end   - the end time in nanoseconds
-     * @return - the duration between the start and end in seconds
-     */
-    public static double intervalToSeconds(long start, long end) {
-        return (end - start) / 1e9;
+        System.out.println("time elapsed: " + PostTweets.intervalToSeconds(begin, end));
+        System.out.println("follows per sec: " + (i / PostTweets.intervalToSeconds(begin, end)));
     }
 
     private static int addAllFollowers() {
-        TwitterAPI api = new TwitterHW2Imp();
+        TwitterAPI api = TwitterFactory.createTwitter(TwitterFactory.TwitterType.REDIS_STRAT2);
         int i = 0;
         try {
             String line;
