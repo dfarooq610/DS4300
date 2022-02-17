@@ -44,12 +44,38 @@ public class TwitterHW2Imp implements TwitterAPI {
 
     @Override
     private List<Integer> getTimeline(int userId) {
-        return this.jedis.hget("user:" + userId, "timeline");
+        // get the last 10 tweets from the timeline of the user with the given user id
+        List<String> fullTimelineString = this.jedis.hget("user:" + userId, "timeline");
+        // get the last 10 tweets from the timeline
+        List<String> timelineString = fullTimelineString.subList(Math.max(0, fullTimelineString.size() - 10), fullTimelineString.size());
+
+        // convert the timeline to a list of tweet ids
+        List<Integer> timeline = new ArrayList<>();
+        for (String tweetId : timelineString) {
+            try {
+                timeline.add(Integer.parseInt(tweetId));
+            } catch (NumberFormatException e) {
+                System.out.println("Error parsing tweet id: " + tweetId);
+            }
+        }
+
+        return timeline;
     }
 
     @Override
     public Set<Integer> getFollowers(int userId) {
-        return this.jedis.hget("user:" + userId, "followers");
+        List<String> followers = this.jedis.hget("user:" + userId, "followers");
+        List<Integer> followerIds = new ArrayList<>();
+
+        for (String follower : followers) {
+            try {
+                followerIds.add(Integer.parseInt(follower));
+            } catch (NumberFormatException e) {
+                System.out.println("Error parsing follower: " + follower);
+            }
+        }
+
+        return followerIds;
     }
 
     @Override
@@ -64,7 +90,18 @@ public class TwitterHW2Imp implements TwitterAPI {
 
     @Override
     public List<Integer> getAllUsers() {
-        return this.jedis.lrange("users", 0, -1);
+        List<String> userIdStrings = this.jedis.lrange("users", 0, -1);
+        List<Integer> userIds = new java.util.ArrayList<>();
+
+        for (String userIdString : userIdStrings) {
+            try {
+                userIds.add(Integer.parseInt(userIdString));
+            } catch (NumberFormatException e) {
+                System.out.println("Error parsing userId: " + userIdString);
+            }
+        }
+
+        return userIds;
     }
 
     @Override
