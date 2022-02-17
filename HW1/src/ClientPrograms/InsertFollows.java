@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class FollowerInsertion {
+public class InsertFollows {
     private static final String COMMA_DELIMITER = ",";
     public static String FILENAME = "data/test/follows.csv";
 

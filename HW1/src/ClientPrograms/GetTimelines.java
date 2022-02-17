@@ -1,6 +1,7 @@
 package ClientPrograms;
 
 import Twitter.HW1.TwitterHW1Imp;
+import Twitter.HW2.TwitterHW2Imp;
 import Twitter.TwitterAPI;
 
 import java.util.List;
@@ -20,7 +21,8 @@ import java.util.Random;
 public class GetTimelines {
 
     public static void main(String[] args) {
-        TwitterAPI api = new TwitterHW1Imp(System.getenv("TWITTER_USER"), System.getenv("TWITTER_PASSWORD"), "jdbc:postgresql://localhost:5432/twitter");
+//        TwitterAPI api = new TwitterHW1Imp(System.getenv("TWITTER_USER"), System.getenv("TWITTER_PASSWORD"), "jdbc:postgresql://localhost:5432/twitter");
+        TwitterAPI api = new TwitterHW2Imp();
         List<Integer> userIds = api.getAllUsers();
         System.out.println("Choosing from " + userIds.size() + " users total");
 

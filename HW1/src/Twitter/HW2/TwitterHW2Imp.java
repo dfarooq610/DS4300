@@ -5,8 +5,6 @@ import Twitter.TwitterAPI;
 import redis.clients.jedis.Jedis;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +27,9 @@ public class TwitterHW2Imp implements TwitterAPI {
     public static String FOLLOWERS_PREFIX = "followers:";
     public static String FOLLOWS_PREFIX = "follows:";
     public static String TIMELINE_PREFIX = "timeline:";
-    public static String TWEET_HASH_KEY = "tweet";
+    public static String TWEET_TXT_HASH_KEY = "tweetTxt:";
+    public static String TWEET_TS_HASH_KEY = "tweetTS:";
+    public static String USERS_SET = "users";
 
     public TwitterHW2Imp() {
         this.jedis = new Jedis();
@@ -53,7 +53,8 @@ public class TwitterHW2Imp implements TwitterAPI {
     public void postTweet(Tweet t) {
         String latestTweetId = getLatestTweetId();
         // add tweet to database with the latest tweet id in the form userId tweetTxt tweetTS
-        this.jedis.hset(TWEET_HASH_KEY, latestTweetId, t.toString());
+        this.jedis.hset(TWEET_TS_HASH_KEY, latestTweetId, t.getTweetTS().toString());
+        this.jedis.hset(TWEET_TXT_HASH_KEY, latestTweetId, t.getTweetTxt());
         Set<Integer> followers = this.getFollowers(t.getUserId()); // get followers of the user who posted this tweet
         // for each follower, add tweet id to their timeline
         for (Integer follower : followers) {
@@ -70,9 +71,9 @@ public class TwitterHW2Imp implements TwitterAPI {
 
         // for each tweet, get the tweet hash info, parse it, and convert it to a Tweet object
         return tweetIds.stream().map(id -> {
-            String tweetInfo = jedis.hget(TWEET_HASH_KEY, Integer.toString(userId));
-            List<String> seperatedTweetInfo = Arrays.asList(tweetInfo.split(" "));
-            return new Tweet(id, userId, seperatedTweetInfo.get(0), Timestamp.valueOf(seperatedTweetInfo.get(1)));
+            String tweetTxt = jedis.hget(TWEET_TXT_HASH_KEY, Integer.toString(id));
+            Timestamp tweetTs = Timestamp.valueOf(jedis.hget(TWEET_TS_HASH_KEY, Integer.toString(id)));
+            return new Tweet(id, userId, tweetTxt, tweetTs);
         }).collect(Collectors.toList());
     }
 
@@ -95,33 +96,24 @@ public class TwitterHW2Imp implements TwitterAPI {
 
     @Override
     public List<Integer> getAllUsers() {
-        List<String> userIdStrings = this.jedis.lrange("users", 0, -1);
-        List<Integer> userIds = new java.util.ArrayList<>();
-
-        for (String userIdString : userIdStrings) {
-            try {
-                userIds.add(Integer.parseInt(userIdString));
-            } catch (NumberFormatException e) {
-                System.out.println("Error parsing userId: " + userIdString);
-            }
-        }
-
-        return userIds;
+        return jedis.smembers(USERS_SET).stream().map(Integer::parseInt).collect(Collectors.toList());
     }
 
     @Override
     public void addFollow(int userId, int followId) {
+        jedis.sadd(USERS_SET, Integer.toString(userId));
+        jedis.sadd(USERS_SET, Integer.toString(followId));
+
         // add the userId to the followId's followers
         jedis.sadd(FOLLOWERS_PREFIX + followId, Integer.toString(userId));
 
-        // add the followID to the userId's follows (**NECESSARY FOR GET TIMELINE**)
+        // add the followID to the userId's follows
         jedis.sadd(FOLLOWS_PREFIX + userId, Integer.toString(followId));
     }
 
     @Override
     public void closeConnection() {
         jedis.close();
-        jedis.flushAll();
     }
 
     private void incrementLatestTweetId() {

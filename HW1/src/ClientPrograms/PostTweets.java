@@ -1,6 +1,7 @@
 package ClientPrograms;
 
 import Twitter.HW1.TwitterHW1Imp;
+import Twitter.HW2.TwitterHW2Imp;
 import Twitter.Tweet;
 import Twitter.TwitterAPI;
 
@@ -43,7 +44,9 @@ public class PostTweets {
     }
 
     private static int postAllTweets() {
-        TwitterAPI api = new TwitterHW1Imp(System.getenv("TWITTER_USER"), System.getenv("TWITTER_PASSWORD"), "jdbc:postgresql://localhost:5432/twitter");
+//        TwitterAPI api = new TwitterHW1Imp(System.getenv("TWITTER_USER"), System.getenv("TWITTER_PASSWORD"), "jdbc:postgresql://localhost:5432/twitter");
+
+        TwitterAPI api = new TwitterHW2Imp();
         int i = 0;
         try {
             String line;

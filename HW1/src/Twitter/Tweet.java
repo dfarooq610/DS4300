@@ -35,11 +35,5 @@ public class Tweet {
         this.userId = userId;
         this.tweetTxt = tweetTxt;
         this.tweetTS = tweetTS;
-        System.out.print(this.toString());
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("%s %s", tweetTxt, tweetTS.toString());
     }
 }
