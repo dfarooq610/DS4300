@@ -1,6 +1,5 @@
 package ClientPrograms;
 
-import Twitter.HW2.TwitterHW2Strat2Imp;
 import Twitter.Tweet;
 import Twitter.TwitterAPI;
 
@@ -47,7 +46,7 @@ public class PostTweets {
     }
 
     private static int postAllTweets() {
-        TwitterAPI api = TwitterFactory.createTwitter(TwitterFactory.TwitterType.REDIS_STRAT2);
+        TwitterAPI api = TwitterFactory.createTwitter(TwitterFactory.TwitterType.REDIS_STRAT2, false);
         int i = 0;
         try {
             String line;

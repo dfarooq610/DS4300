@@ -30,7 +30,7 @@ public class InsertFollows {
     }
 
     private static int addAllFollowers() {
-        TwitterAPI api = TwitterFactory.createTwitter(TwitterFactory.TwitterType.REDIS_STRAT2);
+        TwitterAPI api = TwitterFactory.createTwitter(TwitterFactory.TwitterType.REDIS_STRAT2, false);
         int i = 0;
         try {
             String line;
@@ -59,8 +59,8 @@ public class InsertFollows {
             }
         }
         return List.of(
-          Integer.parseInt(values.get(0)),
-          Integer.parseInt(values.get(1))
+                Integer.parseInt(values.get(0)),
+                Integer.parseInt(values.get(1))
         );
     }
 }
