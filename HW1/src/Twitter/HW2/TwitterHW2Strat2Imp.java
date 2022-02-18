@@ -27,9 +27,10 @@ public class TwitterHW2Strat2Imp implements TwitterAPI {
     public static String FOLLOWERS_PREFIX = "followers:";
     public static String FOLLOWS_PREFIX = "follows:";
     public static String TIMELINE_PREFIX = "timeline:";
-    public static String TWEET_TXT_KEY = "tweetTxt:";
-    public static String TWEET_TS_KEY = "tweetTS:";
     public static String USERS_SET = "users";
+    public static String TWEET_HASH_KEY = "tweet:";
+    public static String TWEET_TXT_KEY = "tweetTxt";
+    public static String TWEET_TS_KEY = "tweetTS";
 
     public TwitterHW2Strat2Imp() {
         this.jedis = new Jedis();
@@ -53,8 +54,8 @@ public class TwitterHW2Strat2Imp implements TwitterAPI {
     public void postTweet(Tweet t) {
         String latestTweetId = getLatestTweetId();
         // add tweet to database with the latest tweet id in the form userId tweetTxt tweetTS
-        this.jedis.set(TWEET_TS_KEY + latestTweetId, t.getTweetTS().toString());
-        this.jedis.set(TWEET_TXT_KEY + latestTweetId, t.getTweetTxt());
+        this.jedis.hset(TWEET_HASH_KEY + latestTweetId, TWEET_TS_KEY, t.getTweetTS().toString());
+        this.jedis.hset(TWEET_HASH_KEY + latestTweetId, TWEET_TXT_KEY, t.getTweetTxt());
         Set<Integer> followers = this.getFollowers(t.getUserId()); // get followers of the user who posted this tweet
         // for each follower, add tweet id to their timeline
         for (Integer follower : followers) {
@@ -71,8 +72,8 @@ public class TwitterHW2Strat2Imp implements TwitterAPI {
 
         // for each tweet, get the tweet hash info, parse it, and convert it to a Tweet object
         return tweetIds.stream().map(id -> {
-            String tweetTxt = jedis.get(TWEET_TXT_KEY + id);
-            Timestamp tweetTs = Timestamp.valueOf(jedis.get(TWEET_TS_KEY + id));
+            String tweetTxt = jedis.hget(TWEET_HASH_KEY + id, TWEET_TXT_KEY);
+            Timestamp tweetTs = Timestamp.valueOf(jedis.hget(TWEET_HASH_KEY + id, TWEET_TS_KEY));
             return new Tweet(id, userId, tweetTxt, tweetTs);
         }).collect(Collectors.toList());
     }
