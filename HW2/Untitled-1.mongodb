@@ -7,9 +7,39 @@
 use('Restaurants');
 
 const aggregate = [
-    {
-        
+  {
+    $match: {
+      "grades.0": {$exists: true}, 
+      "cuisine": "Hotdogs/Pretzels"
     }
+  },
+  {
+    $project: {
+      _id: "$restaurant_id",
+      totalScore:  {
+        $reduce: {
+          input: "$grades",
+          initialValue: 0,
+          in: { $add : ["$$value", "$$this.score"] }
+        }
+      },
+      numReviews: {$size: "$grades"},
+      name: true
+    }
+  }, 
+  {
+    $project: {
+      averageScore: { $divide: ["$totalScore", "$numReviews"]},
+      numReviews: true, 
+      name: true
+    }
+  }, 
+  {
+    $sort: { "averageScore": -1 }
+  },
+  {
+    $limit: 5
+  }
 ];
 
 db["New York"].aggregate(aggregate)
